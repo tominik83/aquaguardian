@@ -140,7 +140,7 @@ sensor:
     update_interval: 90s
     
   - platform: uptime
-    name: Aquaguardian Device UpTime
+    name: Aquaguardian UpTime
 
 switch:
   - platform: output
