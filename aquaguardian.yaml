@@ -1,0 +1,216 @@
+substitutions:
+  device_name: "aquaguardian"
+  api_url: !secret update_url
+  
+esphome:
+  name: ${device_name}
+  
+
+esp8266:
+  board: d1_mini
+
+wifi:
+  networks:
+#  - ssid: !secret wifi_not
+#    password: !secret wifi_pass
+  - ssid: !secret wifi_iot
+    password: !secret wifi_pass      
+  # Optional manual IP
+  manual_ip:
+    static_ip: !secret aquaguardian_ip
+    gateway: !secret gateway
+    subnet: 255.255.0.0
+    dns1: !secret dns1
+    dns2: !secret dns2
+#  use_address: 172.16.12.71  
+  fast_connect: true
+  ap:
+    ssid: "Aquaguardian Fallback Hotspot"
+    password: !secret wifi_pass
+
+captive_portal:
+
+# Enable logging
+logger:
+
+ota:
+  - platform: esphome
+  - platform: http_request
+    #id: ota_flash_action
+
+http_request:
+  verify_ssl: false
+  # id: http_client
+
+update:
+  - platform: http_request
+    name: Firmware Update
+    source: ${api_url}
+
+web_server:
+  port: 80
+  auth: 
+    username: !secret web_user
+    password: !secret web_pass
+
+mqtt:
+  broker: !secret broker_ip
+  port: 1883
+  username: esphome
+  password: !secret mqtt_password
+  # ...
+  birth_message:
+    topic: esphome/aquaguardian/status
+    payload: online
+  will_message:
+    topic: esphome/aquaguardian/status
+    payload: offline
+
+
+binary_sensor:
+  - platform: gpio
+    filters:
+      - invert
+    pin:  D7
+    name: light_detector
+    device_class: light
+#    inverted: true
+#    internal: true
+#    filters:
+#      - invert:
+#      - delayed_on: 100ms
+#      - delayed_off: 600ms
+#      - delayed_on_off: 100ms
+#      - autorepeat:
+#        - delay: 1s
+#          time_off: 100ms
+#          time_on: 900ms
+#        - delay: 5s
+#          time_off: 100ms
+#          time_on: 400ms
+   
+#  - platform: gpio
+#    pin: D8
+#    name: bad_motion
+#    device_class: motion
+#    id: motion_sensor
+
+#  - platform: copy
+#    source_id: motion_sensor
+#    id: zauzece
+#    icon: "mdi:heat-pump"
+#    name: Occupancy
+#    device_class: "occupancy"
+#    filters:
+#      - invert:
+#      - delayed_on: 100ms
+#      - delayed_off: 600ms
+#      - delayed_on_off: 100ms
+#      - autorepeat:
+#        - delay: 1s
+#          time_off: 100ms
+#          time_on: 900ms
+#        - delay: 5s
+#          time_off: 100ms
+#          time_on: 400ms
+#      - lambda: |-
+#          if (id(motion_sensor).state) {
+#            return "OFF";
+#           if (id(motion_sensor).state) {
+#            return "OFF";
+#          } else {
+#            return {};
+#          }
+
+sensor:
+  - platform: dht
+    model: DHT22
+    pin: D3
+    temperature:
+#      filters:
+#      - offset: -4.0
+      name: "Aquaguardian Temperature"
+    humidity:
+      accuracy_decimals: 1
+      name: "Aquaguardian Humidity"
+    update_interval: 30s
+
+  - platform: wifi_signal
+    name: Aquaguardian Wifi Signal
+    update_interval: 90s
+    
+  - platform: uptime
+    name: Aquaguardian Device UpTime
+
+switch:
+  - platform: output
+    name: "Spiegel Licht"
+#    icon: "mdi:lamp"
+    output: relay
+
+
+#on_press:
+#  then:
+#    - light.turn_on:
+#        id: some_light_id
+#        transition_length: 0.5s
+#        red: 0.8
+#        green: 1.0
+#        blue: !lambda |-
+#          // The sensor outputs values from 0 to 100. The blue
+#          // part of the light color will be determined by the sensor value.
+#          return id(some_sensor).state / 100.0;
+
+button:
+  - platform: template
+    name: "Update"
+    id: firmware_update
+    on_press:
+      then:
+        - ota.http_request.flash:
+            md5_url: http://example.com/firmware.md5
+            url: https://example.com/firmware.ota.bin
+            username: !secret web_user
+            password: !secret web_pass
+        - logger.log: "This message should not be displayed because the device reboots"
+
+
+  
+  - platform: shutdown
+    name: "Aquaguardian Shutdown"
+    entity_category: diagnostic
+
+  - platform: restart
+    name: "Aquaguardian Restart"
+    entity_category: diagnostic
+
+  - platform: safe_mode
+    name: "Aquaguardian Restart (Safe Mode)"
+    entity_category: diagnostic
+    
+
+light:
+  - platform: monochromatic
+    name: "TusLED1"
+    output: pwm1
+    
+  - platform: monochromatic
+    name: "TusLED2"
+    output: pwm2
+
+# Example output entry
+output:
+  - platform: esp8266_pwm
+    id: pwm1
+    pin: D2   
+
+  - platform: esp8266_pwm
+    id: pwm2
+    pin: D8
+
+  - platform: gpio
+    id: relay
+    pin: D1
+    
+status_led:
+  pin: D4
