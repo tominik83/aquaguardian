@@ -168,8 +168,8 @@ button:
     on_press:
       then:
         - ota.http_request.flash:
-            md5_url: http://example.com/firmware.md5
-            url: https://example.com/firmware.ota.bin
+            md5_url: https://github.com/tominik83/aquaguardian/raw/refs/heads/main/firmware.md5
+            url: https://github.com/tominik83/aquaguardian/raw/refs/heads/main/firmware.ota.bin
             username: !secret web_user
             password: !secret web_pass
         - logger.log: "This message should not be displayed because the device reboots"
