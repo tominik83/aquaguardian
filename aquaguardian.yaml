@@ -1,13 +1,20 @@
 substitutions:
   device_name: "aquaguardian"
   api_url: !secret update_url
+  friendly_name: "toaletko"
   
 esphome:
   name: ${device_name}
-  
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: "bbt.wc"
+    version: "2024.10.3"
 
-esp8266:
-  board: d1_mini
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
 
 wifi:
   networks:
@@ -25,7 +32,7 @@ wifi:
 #  use_address: 172.16.12.71  
   fast_connect: true
   ap:
-    ssid: "Aquaguardian Fallback Hotspot"
+    ssid: "${friendly_name} Fallback Hotspot"
     password: !secret wifi_pass
 
 captive_portal:
@@ -33,13 +40,19 @@ captive_portal:
 # Enable logging
 logger:
 
+api:
+
+dashboard_import:
+  package_import_url: !secret package_url
+  import_full_config: true # or false
+
 ota:
   - platform: esphome
   - platform: http_request
     #id: ota_flash_action
 
 http_request:
-  verify_ssl: false
+  #verify_ssl: false
   # id: http_client
 
 update:
@@ -47,11 +60,15 @@ update:
     name: Firmware Update
     source: ${api_url}
 
-web_server:
-  port: 80
-  auth: 
-    username: !secret web_user
-    password: !secret web_pass
+esp32_improv:
+  authorizer: none
+
+
+# web_server:
+#   port: 80
+#   auth: 
+#     username: !secret web_user
+#     password: !secret web_pass
 
 mqtt:
   broker: !secret broker_ip
@@ -60,10 +77,10 @@ mqtt:
   password: !secret mqtt_password
   # ...
   birth_message:
-    topic: esphome/aquaguardian/status
+    topic: esphome/${device_name}/status
     payload: online
   will_message:
-    topic: esphome/aquaguardian/status
+    topic: esphome/${device_name}/status
     payload: offline
 
 
@@ -71,7 +88,7 @@ binary_sensor:
   - platform: gpio
     filters:
       - invert
-    pin:  D7
+    pin:  GPIO5
     name: light_detector
     device_class: light
 #    inverted: true
@@ -125,22 +142,22 @@ binary_sensor:
 sensor:
   - platform: dht
     model: DHT22
-    pin: D3
+    pin: GPIO17
     temperature:
 #      filters:
 #      - offset: -4.0
-      name: "Aquaguardian Temperature"
+      name: "${friendly_name} Temperature"
     humidity:
       accuracy_decimals: 1
-      name: "Aquaguardian Humidity"
-    update_interval: 30s
+      name: "${friendly_name} Humidity"
+    update_interval: 60s
 
   - platform: wifi_signal
-    name: Aquaguardian Wifi Signal
+    name: "${friendly_name} Wifi Signal"
     update_interval: 90s
     
   - platform: uptime
-    name: Aquaguardian UpTime
+    name: "${friendly_name} UpTime"
 
 switch:
   - platform: output
@@ -200,17 +217,17 @@ light:
 
 # Example output entry
 output:
-  - platform: esp8266_pwm
-    id: pwm1
-    pin: D2   
+  - platform: ledc
+    pin: GPIO14
+    id: pwm1 
 
-  - platform: esp8266_pwm
+  - platform: ledc
+    pin: GPIO15
     id: pwm2
-    pin: D8
 
   - platform: gpio
     id: relay
-    pin: D1
+    pin: GPIO16
     
-status_led:
-  pin: D4
+# status_led:
+#   pin: D4
