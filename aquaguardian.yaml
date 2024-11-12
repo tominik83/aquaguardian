@@ -1,14 +1,14 @@
 substitutions:
   device_name: "aquaguardian"
   api_url: !secret update_url
-  friendly_name: "toaletko"
+  friendly_name: "Aquaguardian"
   
 esphome:
   name: ${device_name}
   friendly_name: "${friendly_name}"
-  name_add_mac_suffix: true
+  #name_add_mac_suffix: true
   project:
-    name: "bbt.wc"
+    name: "Bibliotehnika.wc"
     version: "2024.10.3"
 
 esp32:
@@ -44,7 +44,7 @@ api:
 
 dashboard_import:
   package_import_url: !secret package_url
-  import_full_config: true # or false
+  import_full_config: false
 
 ota:
   - platform: esphome
@@ -63,6 +63,10 @@ update:
 esp32_improv:
   authorizer: none
 
+improv_serial:
+  next_url: https://bibliotehnika.com/esphome/project/manual?ip={{ip_address}}&name={{device_name}}&version={{esphome_version}}
+
+
 
 # web_server:
 #   port: 80
@@ -75,6 +79,7 @@ mqtt:
   port: 1883
   username: esphome
   password: !secret mqtt_password
+  discovery: false
   # ...
   birth_message:
     topic: esphome/${device_name}/status
@@ -84,86 +89,86 @@ mqtt:
     payload: offline
 
 
-binary_sensor:
-  - platform: gpio
-    filters:
-      - invert
-    pin:  GPIO5
-    name: light_detector
-    device_class: light
-#    inverted: true
-#    internal: true
-#    filters:
-#      - invert:
-#      - delayed_on: 100ms
-#      - delayed_off: 600ms
-#      - delayed_on_off: 100ms
-#      - autorepeat:
-#        - delay: 1s
-#          time_off: 100ms
-#          time_on: 900ms
-#        - delay: 5s
-#          time_off: 100ms
-#          time_on: 400ms
+# binary_sensor:
+#   - platform: gpio
+#     filters:
+#       - invert
+#     pin:  GPIO5
+#     name: light_detector
+#     device_class: light
+# #    inverted: true
+# #    internal: true
+# #    filters:
+# #      - invert:
+# #      - delayed_on: 100ms
+# #      - delayed_off: 600ms
+# #      - delayed_on_off: 100ms
+# #      - autorepeat:
+# #        - delay: 1s
+# #          time_off: 100ms
+# #          time_on: 900ms
+# #        - delay: 5s
+# #          time_off: 100ms
+# #          time_on: 400ms
    
-#  - platform: gpio
-#    pin: D8
-#    name: bad_motion
-#    device_class: motion
-#    id: motion_sensor
+# #  - platform: gpio
+# #    pin: D8
+# #    name: bad_motion
+# #    device_class: motion
+# #    id: motion_sensor
 
-#  - platform: copy
-#    source_id: motion_sensor
-#    id: zauzece
-#    icon: "mdi:heat-pump"
-#    name: Occupancy
-#    device_class: "occupancy"
-#    filters:
-#      - invert:
-#      - delayed_on: 100ms
-#      - delayed_off: 600ms
-#      - delayed_on_off: 100ms
-#      - autorepeat:
-#        - delay: 1s
-#          time_off: 100ms
-#          time_on: 900ms
-#        - delay: 5s
-#          time_off: 100ms
-#          time_on: 400ms
-#      - lambda: |-
-#          if (id(motion_sensor).state) {
-#            return "OFF";
-#           if (id(motion_sensor).state) {
-#            return "OFF";
-#          } else {
-#            return {};
-#          }
+# #  - platform: copy
+# #    source_id: motion_sensor
+# #    id: zauzece
+# #    icon: "mdi:heat-pump"
+# #    name: Occupancy
+# #    device_class: "occupancy"
+# #    filters:
+# #      - invert:
+# #      - delayed_on: 100ms
+# #      - delayed_off: 600ms
+# #      - delayed_on_off: 100ms
+# #      - autorepeat:
+# #        - delay: 1s
+# #          time_off: 100ms
+# #          time_on: 900ms
+# #        - delay: 5s
+# #          time_off: 100ms
+# #          time_on: 400ms
+# #      - lambda: |-
+# #          if (id(motion_sensor).state) {
+# #            return "OFF";
+# #           if (id(motion_sensor).state) {
+# #            return "OFF";
+# #          } else {
+# #            return {};
+# #          }
 
 sensor:
-  - platform: dht
-    model: DHT22
-    pin: GPIO17
-    temperature:
-#      filters:
-#      - offset: -4.0
-      name: "${friendly_name} Temperature"
-    humidity:
-      accuracy_decimals: 1
-      name: "${friendly_name} Humidity"
-    update_interval: 60s
+#   - platform: dht
+#     model: DHT22
+#     pin: GPIO17
+#     temperature:
+# #      filters:
+# #      - offset: -4.0
+#       name: "${friendly_name} Temperature"
+#     humidity:
+#       accuracy_decimals: 1
+#       name: "${friendly_name} Humidity"
+#     update_interval: 60s
 
-  - platform: wifi_signal
-    name: "${friendly_name} Wifi Signal"
-    update_interval: 90s
+#   - platform: wifi_signal
+#     name: "${friendly_name} Wifi Signal"
+#     update_interval: 90s
     
   - platform: uptime
     name: "${friendly_name} UpTime"
 
-switch:
-  - platform: output
-    name: "Spiegel Licht"
-#    icon: "mdi:lamp"
-    output: relay
+# switch:
+#   - platform: output
+#     name: "Spiegel Licht"
+# #    icon: "mdi:lamp"
+#     output: relay
 
 
 #on_press:
@@ -190,44 +195,44 @@ button:
             username: !secret web_user
             password: !secret web_pass
         - logger.log: "This message should not be displayed because the device reboots"
-
+    entity_category: diagnostic
 
   
   - platform: shutdown
-    name: "Aquaguardian Shutdown"
+    name: "${friendly_name} Shutdown"
     entity_category: diagnostic
 
   - platform: restart
-    name: "Aquaguardian Restart"
+    name: "${friendly_name} Restart"
     entity_category: diagnostic
 
   - platform: safe_mode
-    name: "Aquaguardian Restart (Safe Mode)"
+    name: "${friendly_name} Restart (Safe Mode)"
     entity_category: diagnostic
     
 
-light:
-  - platform: monochromatic
-    name: "TusLED1"
-    output: pwm1
+# light:
+#   - platform: monochromatic
+#     name: "TusLED1"
+#     output: pwm1
     
-  - platform: monochromatic
-    name: "TusLED2"
-    output: pwm2
+#   - platform: monochromatic
+#     name: "TusLED2"
+#     output: pwm2
 
-# Example output entry
-output:
-  - platform: ledc
-    pin: GPIO14
-    id: pwm1 
+# # Example output entry
+# output:
+#   - platform: ledc
+#     pin: GPIO14
+#     id: pwm1 
 
-  - platform: ledc
-    pin: GPIO15
-    id: pwm2
+#   - platform: ledc
+#     pin: GPIO15
+#     id: pwm2
 
-  - platform: gpio
-    id: relay
-    pin: GPIO16
+#   - platform: gpio
+#     id: relay
+#     pin: GPIO16
     
-# status_led:
-#   pin: D4
+status_led:
+  pin: GPIO2
