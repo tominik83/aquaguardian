@@ -157,9 +157,9 @@ sensor:
 #       name: "${friendly_name} Humidity"
 #     update_interval: 60s
 
-#   - platform: wifi_signal
-#     name: "${friendly_name} Wifi Signal"
-#     update_interval: 90s
+  - platform: wifi_signal
+    name: "${friendly_name} Wifi Signal"
+    update_interval: 90s
     
   - platform: uptime
     name: "${friendly_name} UpTime"
